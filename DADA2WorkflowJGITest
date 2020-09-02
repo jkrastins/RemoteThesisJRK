@@ -21,6 +21,15 @@ library("seqinr")
 
 ```
 
+```{r identify-and-remove-primers}
+
+cutadapt <- "/RemoteThesis/cutadapt-venv/bin/python"
+
+
+```
+
+
+
 ```{r extract-sample-and-file-name, include = FALSE}
 # NOTE: Much of the following follows the DADA2 tutorials available here:
 # https://benjjneb.github.io/dada2/tutorial.html
@@ -29,20 +38,27 @@ library("seqinr")
 # set the base path for our input data files
 path <- "/data/jgi_data_biosphere2/expanded_data/Glocarcypl2itags/Raw Data"
 
-# Sort ensures samples are in order
-filenames_reverse_JGI_reads <- sort(list.files(path, pattern = ".fastq.gz"))
-
 # Extract sample names, assuming filenames have format: SAMPLENAME.fastq
-sample_names <- sapply(strsplit(filenames_reverse_JGI_reads, ".fastq.gz"), `[`, 1)
 
+
+filenames_reverse_JGI_reads_base <- sort(list.files(path, pattern = ".fastq.gz"))
+
+filenames_reverse_JGI_reads<- grep("11162.1.194217.", filenames_reverse_JGI_reads_base, value = TRUE)
+
+sample_names_base <- sapply(strsplit(filenames_reverse_JGI_reads, ".fastq.gz"), `[`, 1)
+
+sample_names <- sapply(strsplit(sample_names_base, "11162.1.194217."), `[`, 2)
 
 # Specify the full path to each of the filenames_reverse_JGI_reads
 filenames_reverse_JGI_reads <- file.path(path, filenames_reverse_JGI_reads)
+
+
 ```
+
 
 ```{r check-quality-plots}
 # Plots the quality profiles of first twenty samples to esimate quality
-plotQualityProfile(filenames_reverse_JGI_reads[1:20])
+plotQualityProfile(filenames_reverse_JGI_reads[1:39])
 ```
 
 **Figure 1**:Quality profiles of all examined fastq files
@@ -62,9 +78,9 @@ filtered_reads_path <- file.path(filter_path,
 # https://benjjneb.github.io/dada2/ITS_workflow.html
 filtered_output_JGI_reads <- filterAndTrim(fwd = filenames_reverse_JGI_reads,
                                  filt = filtered_reads_path,           
-                                 minLen = 27,
+                                 trimLeft = 40,
                                  maxN = 0, # discard any seqs with Ns
-                                 maxEE = 4, # allow w/ up to 4 errors
+                                 maxEE = 2, # allow w/ up to 4 errors
                                  truncLen = (200),
                                  truncQ = 2, # cut off if quality drops here
                                  rm.phix = TRUE,
@@ -92,7 +108,7 @@ errors_reverse_JGI_reads <- learnErrors(filtered_reads_path,
 
 ```{r visualize-errors-with-plots}
 # quick check to see if error models match data
-# (black lines match black points) and are generally decresing left to right
+# (black lines match black points) and are generally decreasing left to right
 plotErrors(errors_reverse_JGI_reads,
            nominalQ = TRUE)
 ```
@@ -107,6 +123,10 @@ dereplicated_reverse_JGI_reads <- derepFastq(filtered_reads_path,
 
 # Name the derep-class objects by the sample names
 names(dereplicated_reverse_JGI_reads) <- sample_names
+```
+
+```{r infer-samples}
+dadaFs <- dada(dereplicated_reverse_JGI_reads, err=errors_reverse_JGI_reads, multithread=TRUE)
 ```
 
 ```{r make-sequence-table, include = FALSE}
@@ -124,7 +144,6 @@ hist(nchar(getSequences(sequence_table)),
 **Figure 3**: Histogram ilustrating average read length across
 
 Almost all sequences varied between 200 and 250 base pairs in length, with there being an overall normal distribution of the reads centered close to 225 bp.
-
 
 ```{r remove-chimeras}
 # Check for and remove chimeras
@@ -170,7 +189,7 @@ Overall, each fastq file retained roughly 90% of its original reads, with most o
 ```{r assign-taxonomy}
 # assigns taxonomy to each sequence variant based on the UNITE fungal database
 # made up of known sequences
-unite_ref <- "sh_general_release_10.10.2017/sh_general_release_dynamic_10.10.2017.fasta"
+unite_ref <- "input/sh_general_release_dynamic_04.02.2020.fasta"
 
 taxa <- assignTaxonomy(sequence_table_nochim,
                        unite_ref,
@@ -214,12 +233,11 @@ export_taxa_table_and_seqs(sequence_table_nochim,
 # here the `sep = "\t"` tells the function that the data are tab-delimited
 # and the `stringsAsFactors = FALSE` tells it not to assume that things are
 # categorical variables
-metadata_in <- read.table(paste0("data/metadata/",
-                    "SraRunTable.txt"),
-                          sep = "\t",
+metadata_in <- read.csv(paste0("data/spReport.csv"),
+                          sep = ",",
                           header = TRUE,
                           stringsAsFactors = FALSE,
-                          row.names = 6) # sets sample IDs to row names
+                          row.names = sample_names)
 
 # Construct phyloseq object (straightforward from dada2 outputs)
 phyloseq_obj <- phyloseq(otu_table(sequence_table_nochim,
