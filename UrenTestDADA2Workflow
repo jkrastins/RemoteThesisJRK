@@ -1,0 +1,233 @@
+sThis workflow uses the DADA2 RStudio package to process the raw data used in my remote thesis project into a form amenable to taxonomic assignment via the UNITE and GenBank databases. There are 4 seperate sub-pipelines, one for each of the Standard and JGI Primers using the mock fungal dataset, and another for each of the JGI and Standard primers using the test dataset collected in Biosphere 2 in 2019.
+
+
+```{r load-packages-and-data}
+# load packages as needed
+library("dplyr")
+library("fs")
+library("dada2")
+packageVersion("dada2")
+library(ShortRead)
+packageVersion("ShortRead")
+library(Biostrings)
+packageVersion("Biostrings")
+library("tidyr")
+library("knitr")
+library("ggplot2")
+library("phyloseq")
+library("citr")
+library("seqinr")
+
+
+```
+
+```{r extract-sample-and-file-name, include = FALSE}
+# NOTE: Much of the following follows the DADA2 tutorials available here:
+# https://benjjneb.github.io/dada2/tutorial.html
+# Accessed November 26, 2018
+
+# set the base path for our input data files
+path <- "/data/uren_data_biosphere2/expanded_data/uren_data/Biosphere2_R2"
+
+# Sort ensures samples are in order
+filenames_reverse_JGI_reads <- sort(list.files(path, pattern = ".fastq"))
+
+# Extract sample names, assuming filenames have format: SAMPLENAME.fastq
+sample_names_base <- sapply(strsplit(filenames_reverse_JGI_reads, "_IBESTGRC_JU_988_R2_ITS-hdr.fastq"), `[`, 1)
+
+sample_names<- sapply(strsplit(sample_names_base, "LM."), `[`, 2)
+
+
+# Specify the full path to each of the filenames_reverse_JGI_reads
+filenames_reverse_JGI_reads <- file.path(path, filenames_reverse_JGI_reads)
+```
+
+```{r check-quality-plots}
+# Plots the quality profiles of first twenty samples to esimate quality
+plotQualityProfile(filenames_reverse_JGI_reads[1:38])
+```
+
+**Figure 1**:Quality profiles of all examined fastq files
+
+Most of the reads tended to drop precipitously in quality after around 200 bases. This trend held true across all sample files.
+
+```{r filter-reads}
+# Place filtered files in filtered/ subdirectory
+# note this will fail if the directory doesn't exist
+filter_path <- file.path("output", "filtered")
+filtered_reads_path <- file.path(filter_path,
+                                 paste0(sample_names,
+                                        "_filt.fastq.gz"))
+
+# See ?filterAndTrim for details on the parameters
+# See here for adjustments for ITS data:
+# https://benjjneb.github.io/dada2/ITS_workflow.html
+filtered_output_JGI_reads <- filterAndTrim(fwd = filenames_reverse_JGI_reads,
+                                 filt = filtered_reads_path,           
+                                 minLen = 27,
+                                 maxN = 0, # discard any seqs with Ns
+                                 maxEE = 4, # allow w/ up to 4 errors
+                                 truncLen = (200),
+                                 truncQ = 2, # cut off if quality drops here
+                                 rm.phix = TRUE,
+                                 compress = TRUE,
+                                 multithread = TRUE)
+```
+
+
+```{r filtered-read-counts-table, include = FALSE}
+# produce nicely-formatted markdown table of read counts
+# before/after trimming
+kable(filtered_output_JGI_reads,
+      col.names = c("Reads In",
+                    "Reads Out"))
+```
+
+**Table 1**: Table showing how many reads were edited out by filterAndTrim
+
+
+```{r learn-errors}
+# this build error models from each of the samples
+errors_reverse_JGI_reads <- learnErrors(filtered_reads_path,
+                                    multithread = TRUE)
+```
+
+```{r visualize-errors-with-plots}
+# quick check to see if error models match data
+# (black lines match black points) and are generally decresing left to right
+plotErrors(errors_reverse_JGI_reads,
+           nominalQ = TRUE)
+```
+
+**Figure 2**: Chart of possible errors in base reads
+
+
+```{r dereplicate-sequences, include = FALSE}
+# get rid of any duplicated sequences
+dereplicated_reverse_JGI_reads <- derepFastq(filtered_reads_path,
+                                         verbose = TRUE)
+
+# Name the derep-class objects by the sample names
+names(dereplicated_reverse_JGI_reads) <- sample_names
+```
+
+```{r make-sequence-table, include = FALSE}
+# produce the 'site by species matrix'
+sequence_table <- makeSequenceTable(dereplicated_reverse_JGI_reads)
+```
+
+```{r histogram-of-sequence-lengths}
+# Quick check to look at distribution of trimmed and denoised sequences
+hist(nchar(getSequences(sequence_table)),
+     main = "Histogram of final sequence variant lengths",
+     xlab = "Sequence length in bp")
+```
+
+**Figure 3**: Histogram ilustrating average read length across
+
+Almost all sequences varied between 200 and 250 base pairs in length, with there being an overall normal distribution of the reads centered close to 225 bp.
+
+
+```{r remove-chimeras}
+# Check for and remove chimeras
+sequence_table_nochim <- removeBimeraDenovo(sequence_table,
+                                            method = "consensus",
+                                            multithread = TRUE,
+                                            verbose = TRUE)
+
+# What percent of our reads are non-chimeric?
+non_chimeric_reads <- round(sum(sequence_table_nochim) / sum(sequence_table),
+                            digits = 4) * 100
+```
+
+After removing chimeras, there were `r non_chimeric_reads`% of the cleaned reads left.
+
+```{r table-of-pipeline-read-counts}
+# Build a table showing how many sequences remain at each step of the pipeline
+get_n <- function(x) sum(getUniques(x)) # make a quick function
+
+track <- cbind(filtered_output_JGI_reads, # already has 2 columns
+               sapply(dereplicated_reverse_JGI_reads, get_n),
+               rowSums(sequence_table),
+               rowSums(sequence_table_nochim))
+
+# add nice meaningful column names
+colnames(track) <- c("Input",
+                     "Filtered",
+                     "Denoised",
+                     "Sequence Table",
+                     "Non-chimeric")
+
+# set the proper rownames
+rownames(track) <- sample_names
+
+# produce nice markdown table of progress through the pipeline
+kable(track)
+```
+
+**Table 2**: Table showing number of reads left for each fastq file after cleaning
+
+Overall, each fastq file retained roughly 90% of its original reads, with most of the bad seqeunces edited out during the denoising process. The number of chimeric sequences was low, with most being under 5 chimeric sequences, and many having none.
+
+```{r assign-taxonomy}
+# assigns taxonomy to each sequence variant based on the UNITE fungal database
+# made up of known sequences
+unite_ref <- "input/sh_general_release_dynamic_04.02.2020.fasta"
+
+taxa <- assignTaxonomy(sequence_table_nochim,
+                       unite_ref,
+                       multithread = TRUE,
+                       tryRC = TRUE) # also check with seq reverse compliments
+
+# show the results of the taxonomy assignment
+unname(taxa)
+```
+
+```{r extract-sequences-to-fasta}
+# we want to export the cleaned, trimmed, filtered, denoised sequence variants
+# so that we can build a phylogeny - we'll build the phylogeny outside of R
+# but we need the fasta file to do so. We keep the names of each sequence as the
+# sequence itself (which is rather confusing), because that's how DADA2 labels
+# it's columns (e.g. 'species')
+# function taken from https://github.com/benjjneb/dada2/issues/88
+export_taxa_table_and_seqs <- function(sequence_table_nochim,
+                                       file_seqtab,
+                                       file_seqs) {
+  seqtab_t <- as.data.frame(t(sequence_table_nochim)) # transpose to data frame
+  seqs <- row.names(seqtab_t) # extract rownames
+  row.names(seqtab_t) <- seqs # set rownames to sequences
+  outlist <- list(data_loaded = seqtab_t)
+  mctoolsr::export_taxa_table(outlist, file_seqtab) # write out an OTU table
+  seqs <- as.list(seqs)
+  seqinr::write.fasta(seqs, row.names(seqtab_t), file_seqs) # write out fasta
+}
+
+# actually run the function, with the names of the files we want it to create
+# and where to put them
+export_taxa_table_and_seqs(sequence_table_nochim,
+                           "output/sequence_variants_table.txt",
+                           "output/sequence_variants_seqs.fa")
+```
+
+
+```{r read-in-metadata-and-create-phyloseq}
+
+# Next we want to read in the metadata file so we can add that in too
+# This is not a csv file, so we have to use a slightly different syntax
+# here the `sep = "\t"` tells the function that the data are tab-delimited
+# and the `stringsAsFactors = FALSE` tells it not to assume that things are
+# categorical variables
+metadata_in <- read.table("data/SPITS_Meredith_itags_pl2_plate_prep.csv",
+                          sep = ",",
+                          header = FALSE,
+                          stringsAsFactors = FALSE,
+                          row.names = sample_names)
+
+# Construct phyloseq object (straightforward from dada2 outputs)
+phyloseq_obj <- phyloseq(otu_table(sequence_table_nochim,
+                                   taxa_are_rows = FALSE), # sample-spp matrix
+                         sample_data(metadata_in), # metdata for each sample
+                         tax_table(taxa)) # taxonomy for each sequence variant
+
+save(phyloseq_obj, file = "output/phyloseq_obj.Rdata")
+```
