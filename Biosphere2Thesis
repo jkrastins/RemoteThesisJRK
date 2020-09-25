@@ -1,0 +1,60 @@
+---
+title: "Biosphere2Thesis"
+author: "Jason Krastins"
+date: "9/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Introduction
+
+##What is Biosphere 2?
+
+##History of Biosphere 2
+
+##Current uses of Biosphere 2
+
+##Fungal Soil Primers: Importance and History
+
+##Soil Microbial Profiles: Study Data Source
+
+##Overview of Study
+
+#Methods
+
+##Original Data Collection
+
+##DADA2
+
+##Phyloseq
+
+##VEGAN
+
+##FUNGuild
+
+#Results
+
+##Phyloseq Alpha Diversity 
+
+##VEGAN Rarefaction
+
+##VEGAN Beta Diversity
+
+##FUNGuild Functional Guild Assignment
+
+#Discussion
+
+##Implications of Revealed Diversity
+
+##Implications of Primer Differences
+
+##Relation to Other Primer Studies
+
+##Implications for Biosphere 2 ecology
+
+##Future Directions
+
+#Sourc
