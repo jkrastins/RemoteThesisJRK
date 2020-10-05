@@ -1,0 +1,150 @@
+# Methods
+
+## Original Data Collection
+
+The original data collection was done under an Honors project done by Juliana Young at the University of Arizona with assistance from several other collaborators, including Dr. Jana U'ren, her faculty advisor [@young2017microbial]. The original study was examining nitrous oxide pulse dyanmics under drought conditions in the simulated rainforest environment of Biosphere 2. Collection was done at 5 different sites located throughout the rainforest, at several soil depths: Northwest (NE) at 1 (0-100cm), 2 (100-200 cm), and 3 (200-300 cm) depths, South (S) at 1, 2, and 3 depths, and Northwest (NW) at depths 1 and 2. in order to estimate drought effects, samples were taken before adding water, after 3 hours, 6 hours, 9 hours, and 11 hours. Additionally, a high-pulse (HP) nitrogen site was identified near the NE site, and a low-pulse (LP) nitrogen site was sampled near the S site. Both were harvested at the 1st depth only. Sequencing on the samples were done with 16S rRNA primers (for bacteria) and ITS2 Primers (for fungi). The two primer sets for the ITS analysis were ones created by the Joint Genome Institute of the U.S. Department of Energy, with the second set being developed by Ihrmark et al 2012 [@ihrmark2012new].
+
+## Preprocessing of FASTA files
+
+In order to preprocess the FASTA files for efficient display of data further down the pipeline, the two primer datasets were downloaded and combined into one source file, removing any data sample locations appearing in only one primer dataset to ensure comparability. The files were then renamed appropriately using names from provided metadata CSVs to ensure ease of software compatibility and visualisation. Files sequencened using the standard primer dataset had the prefix LM. added for Laura Meredith, the collaborator who sequenced them, while the ones sequenced using the JGI primers had the -JGI suffix added to each file. Other than that, files were named by the time in hours they were sampled after watering (Pre, 3, 6, 9 and 11), the sample location (NE, S, NW, LP, and HP), and the sample soil depth (1, 2 or 3)
+
+## DADA2
+
+DADA2 is an open-source software suite developed by Callahan et al. for modelling and correcting errors in Illumina-sequenced genomic datasets [@callahan2016dada2]. Before processing with DADA2 software functions, the file location was set with the following code:
+
+path <- "/data/RemoteThesis/combined_thesis_data"
+
+filenames_reverse_JGI_reads <- sort(list.files(path))
+
+sample_names <- sapply(strsplit(filenames_reverse_JGI_reads, "_IBESTGRC_JU_988_R2_ITS-hdr.fastq"), `[`, 1)
+
+filenames_reverse_JGI_reads <- file.path(path, filenames_reverse_JGI_reads)
+
+After this, the following code was used in order to filter out bad reads:
+
+filter_path <- file.path("output", "filtered")
+filtered_reads_path <- file.path(filter_path,
+                                 paste0(sample_names,
+                                        "_filt.fastq.gz"))
+                                        
+filtered_output_JGI_reads <- filterAndTrim(fwd = filenames_reverse_JGI_reads,
+                                 filt = filtered_reads_path,           
+                                 trimLeft = 20,
+                                 maxN = 0, # discard any seqs with Ns
+                                 maxEE = 4, # allow w/ up to 4 errors
+                                 truncLen = (240),
+                                 truncQ = 2, # cut off if quality drops here
+                                 rm.phix = TRUE,
+                                 compress = TRUE,
+                                 multithread = TRUE)
+                                 
+These parameters were chosen to remove the first 20 bases of each read (to remove the primer), eliminate reads with ambiguous nucleotides (Ns), minimize errors, and standardize them at a size (240 bp) which quality analysis suggested was the longest size before significant drops in read quality occured. The filtered results from this were fed into the following code:
+
+errors_reverse_JGI_reads <- learnErrors(filtered_reads_path,
+                                    multithread = TRUE)
+                                    
+Which estimated the number of errors present in the samples. This was followed by this code:
+
+dereplicated_reverse_JGI_reads <- derepFastq(filtered_reads_path,
+                                         verbose = TRUE)
+                                         
+Which removed duplicate sequences found in the ITS data. Next, the daya was piped through this funcntion:
+
+dadaFs <- dada(dereplicated_reverse_JGI_reads, err=errors_reverse_JGI_reads, multithread=TRUE)
+
+This program ran random sample interference, which randomly sampled the data from each distinct data point to reduce the overall size of the data pool, while allowing for accurate assesment of the traits of the data.
+
+In order to move forward in the pipeline, the data was compiled into a sequence table using the following sequence:
+
+sequence_table <- makeSequenceTable(dadaFs)
+
+After this, chimeric sequences could be removed from the data using the following function:
+
+sequence_table_nochim <- removeBimeraDenovo(sequence_table,
+                                            method = "consensus",
+                                            multithread = TRUE,
+                                            verbose = TRUE)
+                                            
+After this, taxnomoy could be assigned using the taxa function, with this code:
+
+unite_ref <- "input/sh_general_release_dynamic_04.02.2020.fasta"
+
+taxa <- assignTaxonomy(sequence_table_nochim,
+                       unite_ref,
+                       multithread = TRUE,
+                       tryRC = TRUE)
+                       
+The filtered, dereplicated, inferred, dechimeraed, and taxonomy-assigned data could then be handed off to the phyloseq function.
+
+
+## Phyloseq
+
+Phyloseq is an R package designed for reproducible interactive analysis and visualization microbiome data [@mcmurdie2013phyloseq]. It was one of the main visualization methods used, along with the VEGAN package. In order to visualize the data, a special data format called a phyloseq object was created using the following code: 
+
+metadata_in <- read.table("data/CombinedMetadata.csv",
+                          sep = ",",
+                          header = TRUE,
+                          stringsAsFactors = FALSE,
+                          row.names = sample_names)
+
+
+phyloseq_obj <- phyloseq(otu_table(sequence_table_nochim,
+                                   taxa_are_rows = FALSE), 
+                         sample_data(metadata_in),
+                         tax_table(taxa)) 
+                         
+                         
+Utilizing the sequence table and taxa table from DADA2, along with a manually created .csv file to create qualitative data useful for data visualisation. Following this, the phyloseq package was used to create several plots of the overall species richness across the different sample sites and depths using the plot_richness phyloseq function using the "observed", "Fisher", and "Shannon" alpha diversity assessment indicies.                       
+
+
+## VEGAN
+
+VEGAN is a software package designed to add useful statisical functions for ecologists to the basic R package for use in RStudio [@dixon2003vegan]. Functions in this toolset were used to generate statistical and graphical outputs. 
+
+Before use in the various functions, the OTUs were extracted from the phyloseq object and prepared for applications using the following set of functions:
+
+JGI.otus <-otu_table(phyloseq_obj)
+
+JGI.raremax <- min(apply(JGI.otus, 1, sum))
+
+JGI.Srare <- rrarefy(JGI.otus, JGI.raremax)
+
+otu_table is a phyloseq function that extracted the OTU tables from the general phyloseq object. the min function is to create a subsample including all of the minimum values, to ensure their inclusion further in the data processing. the rrarefy function reduced the size of the sample pool through random sampling in order to give a more compact, readable output while not losing sampling accuracy. This was also important to do because there was a large size discrepancy bewteen the sampling sizes in the standard and JGI primer datasets, with the JGI set being much larger. Without some form of random sampling and size standardization between the two datasets, there could be skewed results that make comparison harder. In particular, the larger sample size of the JGI set could lead to overestimations of relative abundance and diversity. summary stat tables of the alpha diversity of the OTUs were then created for the observed, Fisher, and Shannon alpha diversity measures using the following functions:
+
+site.richness <- apply(JGI.Srare > 0, 1, sum)
+
+site.fisher <- fisher.alpha(JGI.Srare)
+
+site.shannon <- diversity(JGI.Srare, index = "shannon", MARGIN = 1)
+
+The products of these were then piped into a function doing a Wilcox test for nonparametric data statistical significane using these functions:
+
+wilcox.test(site.richness)
+
+wilcox.test(site.shannon)
+
+wilcox.test(site.fisher)
+
+The next test done on the data involved using the rarecurve function to create a rarefaction curve; this curve allowed for a more accurate comparison between the standard and JGI datasets by controlling for the significantly larger sample size present in JGI sample size, while presenting it in a graphical display format. It used the following code:
+
+ rarecurve(JGI.Srare, step = 20, sample = JGI.raremax, col = "blue", cex = 0.6 )
+ 
+The final set of analyses done using the VEGAN stats package involved estiamting the beta diversity of the samples using the beta dispersion function. This was created via processing the rarefied data using a Bray-Curtiss dissimilarity index, using the following code:
+ 
+JGI.bray <- vegdist(JGI.Srare, method = "bray")
+
+JGI.bray.bdisp <- betadisper(JGI.bray, group = as.factor(metadata_in$SampleSource)))
+
+permutest(JGI.bray.bdisp)
+
+plot(JGI.bray.bdisp)
+
+boxplot(JGI.bray.bdisp)
+
+the permutest function was used in order to ensure the homogeneity of the multivariate dispersions; Samples Source was used to group the data so that the differences between the JGI and standard datasets could be accurately visualized by the plot function.
+
+## FUNGuild
+
+FUNGuild is an open-source Python script developed by Nguyen et al. at the University of Minnesota, St. Paul that is designed to parse fungal OTU datasets and assign functional groups to the OTUs based on an assigned taxonomy [@nguyen2016funguild]. In order to use the script, the taxonomy CSV file was formatted into a compatible form by use of the paste function, and was then merged with the original sequence table CSV using the merge function. This was then used as the basis for the FUNGuild script using the following terminal command:
+
+Guilds_v1.1.py -otu PreFUNGuild.txt  -db fungi -m -u 
