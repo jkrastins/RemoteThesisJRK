@@ -2,59 +2,313 @@
 title: "Biosphere2Thesis"
 author: "Jason Krastins"
 date: "9/25/2020"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#Introduction
+# Introduction
 
-##What is Biosphere 2?
+## Soil Microbial Ecology: A Primer
 
-##History of Biosphere 2
+Soil Microbial Ecology is, broadly defined, the study of living things fully or partially invisible to the naked eye such as Bacteria, Archaea, and some Eukaryotes, in the context of how they interact with other living organisms present in an edaphic environment. This typically also includes fungi, mites, and nematodes, since although many of them are at least partially macroscopic, most ecologically relevant interactions take place on a microscopic level [@pavao2008soil].  These interactions are an important area of study for ecology as a whole, since the microscopic edaphic ecology is of fundamental importance to two major ecological processes: the recycling of decaying organisms into soil nutrients, and the acquisition of those nutrients by plants [@amber2008soil]. The majority of soil microorganisms present in a given ecosystem are generally involved in one of these two processes, either primarily or secondarily (e.g. as parasites of plants or predators of soil microbes) [@pavao2008soil]. Extending out further, the soil microbial community has profound impacts on every organism present in an ecosystem, as soil-rooted plants form the energetic basis of the majority of the planet's terrestrial ecosystems. Some examples of important interactions include the nitrogen fixation of certain plant groups with symbiotic bacteria, arbuscular endomycorrhizal fungi associated with the roots most plant groups, and ectomycorrhizal fungi associated with the roots of trees.
 
-##Current uses of Biosphere 2
+## Methods of Study
 
-##Fungal Soil Primers: Importance and History
+Although the importance of soil has been widely recognized as fundamental to ecosystems since the dawn of humanity, the ability to study it in-depth has had to wait on the development of modern microsopic and molecular techniques in order to be able to elucidate much of the diversity and interactions present in the soil [@pavao2008soil]. Starting in the 19th century, compound microscopes enabled scientists to view some microorganisms with the naked eye [@weisenburger2015light]; however, while microscopy is useful for studying some things, such as morphology, it gives limited information as to the ecological roles, interactions, and diversity present in a given sample of soil. In order to really start to dive into these interactions, molecular biological techniques developed with the discovery of DNA and the development of DNA recovery technologies such as PCR [@morange2000history] allowed the collection of environmental DNA from soil. By isolating DNA samples present in a soil sample, it became possible to create detailed profiles of organisms present in a given soil ecosystem. This DNA is isolated from the soil by the use of primers, which are short, single-stranded nucleic acids used by organisms in the initiation of DNA synthesis. These primers recognize specifc regions of DNA that are unique to a specifc group of organisms, allowing only DNA from that group to be isolated from a sample.
 
-##Soil Microbial Profiles: Study Data Source
+## Fungal Soil Primers
 
-##Overview of Study
+Creating primers to isolate fungal species present in soil presents unique challenges compared to other groups. Compared to groups such as Bacteria, who use the ribosomal coding region of DNA for primer recognition, much of the fungal DNA in the ribosomal region is highly conserved, even between distantly related species. Due to this, fungal primers target instead two regions on either side of the fungal ribosomal 5.8S subunit called Internal Transcribed Spacer (ITS) units. These units of DNA flank the 5.8S subunit both upstream (ITS1) and downstream (ITS2) [@xu2016fungal]. The majority of fungal DNA isolation targets these two regions, as they feature a high degree of variability between fungal groups due to not being translated or otherwise used for coding proteins [@xu2016fungal]. Thus, they make an ideal target for primer development and species identification. Over the last 10 years, several different groups have developed competing primer sets. As standardization and reproducibility across datasets is of high importance for scientific research and inquiry, it is important that studies are done to determine which types of fungal primers are most effective for elucidating the fungal diversity present in a sample. Though examining the results of two different ITS2 primer amplified datasets using in silico bioinformatics techniques, this study aims to provide evidence of which ITS2-targetting primer set may be more effective at reveaing soil fungal diversity present in a sample.
 
-#Methods
+## Soil Microbial Profiles: Study Data Source
 
-##Original Data Collection
+The primary source of data for this study came from an Honor's thesis project done by Juliana Young at the University of Arizona, with the assistance of primary faculty collaborator Dr. Jana U'Ren, among others [@young2017microbial]. The primary goal of her study was to examine nitrous oxide flux cycles in the soils of the enclosed tropical rainforest found in the Biosphere 2 reserve located outside of Tuscon, Arizona. She was testing to see how periodic drought affected the production of nitrous oxide, a byproduct of soil microbial metabolism, at various locations throughout the rainforest. In doing this, she sequenced a large amount of genomic data from both the bacterial and fungal communities present in these sites. however, she was only able to evaluate the data for the bacterial communities, leaving an open question as to the extent of the fungal diversity present in these rainforest samples. 
 
-##DADA2
+## What is Biosphere 2?
 
-##Phyloseq
+Biosphere 2 is what is called a mesocosm; that is, an environment which simulates a variety of natural ecosystems in an enclosed environment [@marino1999biosphere]. In addition to simulating rainforest, it simulates coral reef, desert, and grassland ecosystems as well.
+Biosphere 2 represents a good environment for studying in-depth chemical cycling processes because it provides both easier and more controlled access to a variety of ecosystems, making it a popular place for studying in-depth envrionmental cycling processes [@atkinson2001nutrient, @severinghaus1995studies, @nelson1999bioregenerative, @van2005drought]. This is because a wide variety of sensor equipment is present in the facility, making data collection easy [@marino1999biosphere]. However, Biosphere 2 is not without issues. In particular, it displays a limited variety of organisms present in each anevironment, and the ecosystems present have been likened to ecosystems under high pressure from humans. CO2 tends to be much higher than in natural systems, and have a far more limited scope of biotic diversity.
 
-##VEGAN
+## History of Biosphere 2
 
-##FUNGuild
+Biosphere 2 was conceived by businessman Ed Bass and systems ecologist John P. Allen in 1984 as an attempt to create a prototype of the "spaceship earth", a fully enclosed, self-sustaining ecosystem capable of supporting and sustaining human life, as well as the lives of other organisms. These reserves could act as insurance against calamity, or aid in long-distance space travel and exploration [@allen1990historical]. It was named Biosphere 2 to play off the idea that the earth itself was "Biosphere 1". As the human aspect was the main initial focus, the initial attention of the research was directed towards sustaning humans in the environment, with two experiments conducted in the 90s involving people living in the Biosphere 2 seperate from the outside world for 2 years and 6 months, respectively. Overall, the experiments were not considered successful, and outside intervention was required in both cases to enable human survival due to mismanagement both before and during the missions [@allen1999overview, @severinghaus1994oxygen, @weyer2000energy]. Besides the human aspect, there were failures ecologically: many of the species added to the Biosphere 2 did not survive well, and the ecosystems became dominated by only a few hardy pioneer species [@wetterer1999ecological, @leigh1999tropical]. During the late 90s and early 2000s, the Biosphere 2 fell into disrepair. In 2007, it was acquired by the University of Arizona, who began a long redesign and rehabilitation process of the the Biosphere as a dedicated biological research facility. In order to rehabilitate and use the facility for serious long-term ecological study, it is important to understand the current extent of the biological diversity present, both on a micro and macro scale, so that future work can be done in order to introduce new species to make up ecological imbalances, as well as endeavoring to remove or mitigate the prescence of intefering species. 
 
-#Results
+## Overview of Study
 
-##Phyloseq Alpha Diversity 
+This study aims to take the un-analyzed dataset of fungal genomic sequences gathered by Young et al. and analyze them in the context of fungal diversity, using several genomic data statistical processing and display software suites, using primarily the R scripting language in the RStudio integrated open-source coding and development software program. Using the phyloseq and VEGAN genomic RSTudio-based statistical analysis software packages, along with the FUNGuild fungal functional guild assignment software in the Python scripting language, this study aims to process the raw genomic data gathered by Young et. al. These analyses, statistics, and graphics will elucidate two primary questions: firstly, what is the overall levels of fungal soil microbial diversity in the rainforest soil of Biosphere 2, and secondly, which set of primers is better at revealing the diversity of soil organisms present in these samples?
 
-##VEGAN Rarefaction
+# Methods
 
-##VEGAN Beta Diversity
+## Original Data Collection
 
-##FUNGuild Functional Guild Assignment
+The original data collection was done under an Honors project done by Juliana Young at the University of Arizona with assistance from several other collaborators, including Dr. Jana U'ren, her faculty advisor [@young2017microbial]. The original study was examining nitrous oxide pulse dyanmics under drought conditions in the simulated rainforest environment of Biosphere 2. Collection was done at 5 different sites located throughout the rainforest, at several soil depths: Northwest (NE) at 1 (0-100cm), 2 (100-200 cm), and 3 (200-300 cm) depths, South (S) at 1, 2, and 3 depths, and Northwest (NW) at depths 1 and 2. in order to estimate drought effects, samples were taken before adding water, after 3 hours, 6 hours, 9 hours, and 11 hours. Additionally, a high-pulse (HP) nitrogen site was identified near the NE site, and a low-pulse (LP) nitrogen site was sampled near the S site. Both were harvested at the 1st depth only. Sequencing on the samples were done with 16S rRNA primers (for bacteria) and ITS2 Primers (for fungi). The two primer sets for the ITS analysis were ones created by the Joint Genome Institute of the U.S. Department of Energy, with the second set being developed by Ihrmark et al 2012 [@ihrmark2012new].
 
-#Discussion
+## Preprocessing of FASTA files
 
-##Implications of Revealed Diversity
+In order to preprocess the FASTA files for efficient display of data further down the pipeline, the two primer datasets were downloaded and combined into one source file, removing any data sample locations appearing in only one primer dataset to ensure comparability. The files were then renamed appropriately using names from provided metadata CSVs to ensure ease of software compatibility and visualisation. Files sequencened using the standard primer dataset had the prefix LM. added for Laura Meredith, the collaborator who sequenced them, while the ones sequenced using the JGI primers had the -JGI suffix added to each file. Other than that, files were named by the time in hours they were sampled after watering (Pre, 3, 6, 9 and 11), the sample location (NE, S, NW, LP, and HP), and the sample soil depth (1, 2 or 3)
 
-##Implications of Primer Differences
+## DADA2
 
-##Relation to Other Primer Studies
+DADA2 is an open-source software suite developed by Callahan et al. for modelling and correcting errors in Illumina-sequenced genomic datasets [@callahan2016dada2]. Before processing with DADA2 software functions, the file location was set. After this, the filter_path function was used in order to filter out bad reads.
+                              
+For that function, the following parameters were chosen: The first 20 bases of each read were removed (to remove the primer), remove all reads with ambiguous nucleotides (Ns), allow no more than 4 errors, and truncate sequences at a size (240 bp) which quality analysis suggested was the longest size before significant drops in read quality occured. The filtered results from this were fed into the learnErrors function, which estimated the number of errors present in the samples. This was followed by the derepFastq function, which removed duplicate sequences found in the ITS data. Next, the daya was piped through the dada function. This program  is the core random sample interference algorithm of DADA2, which randomly sampled the data from each distinct data point to reduce the overall size of the data pool, while allowing for accurate assesment of the traits of the data.
 
-##Implications for Biosphere 2 ecology
+In order to move forward in the pipeline, the data was compiled into a sequence table. After this, chimeric sequences could be removed from the data using the removeBimeraDenovo function. FInally, taxonomoy was assigned using the taxa function, using the latest release of the UNITE fungal database as a reference.
 
-##Future Directions
+                       
+The filtered, dereplicated, inferred, dechimeraed, and taxonomy-assigned data could then be handed off to the phyloseq function.
 
-#Sourc
+
+## Phyloseq
+
+Phyloseq is an R package designed for reproducible interactive analysis and visualization microbiome data [@mcmurdie2013phyloseq]. It was one of the main visualization methods used, along with the VEGAN package. In order to visualize the data, a special data format called a phyloseq object was created using the phyloseq package by utilizing the sequence table and taxa table from DADA2, along with a manually created .csv file to create qualitative data useful for data visualisation. Following this, the phyloseq package was used to create several plots of the overall species richness across the different sample sites and depths using the plot_richness phyloseq function using the "observed", "Fisher", and "Shannon" alpha diversity assessment indicies.                       
+
+
+## VEGAN
+
+VEGAN is a software package designed to add useful statisical functions for ecologists to the basic R package for use in RStudio [@dixon2003vegan]. Functions in this toolset were used to generate statistical and graphical outputs. 
+
+Before use in the various functions, the OTUs were extracted from the phyloseq object and prepared for applications using the otu_table phyloseq function to extract the OTU tables from the general phyloseq object, then the VEGAN rareification toolset to randomly sample and rarefy the resulting data. The random sampling before rarefaction was important to do because there was a large size discrepancy bewteen the sampling sizes in the standard and JGI primer datasets, with the JGI set being much larger. Without some form of random sampling and size standardization between the two datasets, there could be skewed results that make comparison harder. In particular, the larger sample size of the JGI set could lead to overestimations of relative abundance and diversity. summary stat tables of the alpha diversity of the OTUs were then created for the observed, Fisher, and Shannon alpha diversity measures.
+
+The next test done on the data involved using the rarecurve function to create a rarefaction curve; this curve allowed for a more accurate comparison between the standard and JGI datasets by controlling for the significantly larger sample size present in JGI sample size, while presenting it in a graphical display format.
+ 
+The final set of analyses done using the VEGAN stats package involved estiamting the beta diversity of the samples using the beta dispersion function. This was created via processing the rarefied data using a Bray-Curtiss dissimilarity index.
+ 
+The permutest function was used in order to ensure the homogeneity of the multivariate dispersions; Samples Source was used to group the data so that the differences between the JGI and standard datasets could be accurately visualized by the plot function.
+
+## FUNGuild
+
+FUNGuild is an open-source Python script developed by Nguyen et al. at the University of Minnesota, St. Paul that is designed to parse fungal OTU datasets and assign functional groups to the OTUs based on a taxonomy [@nguyen2016funguild]. In order to use the script, the taxonomy CSV file was formatted into a compatible form by use of the paste function, and was then merged with the original sequence table CSV using the merge function. 
+# Results
+
+## Species Richness Results 
+
+![Alpha Diversity: Observed](Figures/CombinedDataFigures/CombinedAlphaRRare.png)
+
+![Alpha Diversity: Fisher](Figures/CombinedDataFigures/CombinedAlphaFisher.png)
+
+![Alpha Diversity: Shannon](Figures/CombinedDataFigures/CombinedAlphaShannon.png)
+ 
+ These three above charts illustrate the alpha diversity present across the different sample sites. Overall, all the JGI sample sites showed significantly higher levels of diversity for the raw observations as well as the Fisher index; however, when entropy is taken into account with shannon diversity, the gap narrows, and the standard (Uren) and JGI primer datasets are closer to one another. the JGI still has somewhat higher diversity, though. Additionally, while the JGI species counts are more variable for the results of the Observed and Fisher values, they show less variability in Shannon entropy. The inverse is seen with results from the standard primer set. 
+ 
+ 
+ Observed Values:
+ 11-HP-JGI    11-LP-JGI  11-NE-1-JGI  11-NE-2-JGI   11-S-1-JGI   11-S-2-JGI     3-HP-JGI 
+         600          609          533          498          525          519          584 
+    3-LP-JGI   3-NE-1-JGI   3-NE-2-JGI   3-NE-3-JGI   3-NW-1-JGI    3-S-1-JGI    3-S-2-JGI 
+         618          398          611          601          464          418          520 
+   3-S-3-JGI     6-HP-JGI     6-LP-JGI   6-NE-1-JGI   6-NE-2-JGI   6-NW-2-JGI    6-S-1-JGI 
+         442          481          537          448          443          589          352 
+   6-S-2-JGI    6-S-3-JGI   9-NW-1-JGI     LM.11.HP     LM.11.LP   LM.11.NE.1   LM.11.NE.2 
+         384          435          566          157          119           57           69 
+   LM.11.S.1    LM.11.S.2      LM.3.HP      LM.3.LP    LM.3.NE.1    LM.3.NE.2    LM.3.NE.3 
+         104          149          147           59           64           78           67 
+   LM.3.NW.1     LM.3.S.1     LM.3.S.2     LM.3.S.3      LM.6.HP      LM.6.LP    LM.6.NE.1 
+          73          137           97          158          159           78           94 
+   LM.6.NE.2    LM.6.NW.2     LM.6.S.1     LM.6.S.2     LM.6.S.3    LM.9.NW.1    LM.Pre.HP 
+         104          174           50           55           48           74          143 
+   LM.Pre.LP  LM.Pre.NE.1  LM.Pre.NE.2  LM.Pre.NE.3  LM.Pre.NW.1  LM.Pre.NW.2  LM.Pre.NW.3 
+          69            9           60           21            4           40           23 
+  Pre-HP-JGI   Pre-LP-JGI Pre-NE-1-JGI Pre-NE-2-JGI Pre-NE-3-JGI Pre-NW-1-JGI Pre-NW-2-JGI 
+         481          573          179          517          642          354          454 
+Pre-NW-3-JGI 
+         504 
+
+
+Fisher Values:
+   11-HP-JGI    11-LP-JGI  11-NE-1-JGI  11-NE-2-JGI   11-S-1-JGI   11-S-2-JGI     3-HP-JGI 
+ 297.6160076  305.5152912  242.8877396  216.9605749  236.8079606  232.3086130  283.9039829 
+    3-LP-JGI   3-NE-1-JGI   3-NE-2-JGI   3-NE-3-JGI   3-NW-1-JGI    3-S-1-JGI    3-S-2-JGI 
+ 313.5518196  151.8080404  307.2892362  298.4870066  193.3829001  163.8467714  233.0549325 
+   3-S-3-JGI     6-HP-JGI     6-LP-JGI   6-NE-1-JGI   6-NE-2-JGI   6-NW-2-JGI    6-S-1-JGI 
+ 178.9282410  204.9795589  245.9625791  182.8096937  179.5720229  288.1440688  125.8654096 
+   6-S-2-JGI    6-S-3-JGI   9-NW-1-JGI     LM.11.HP     LM.11.LP   LM.11.NE.1   LM.11.NE.2 
+ 143.6589141  174.4565263  268.9702636   40.3366062   27.9910565   11.0135641   13.9699530 
+   LM.11.S.1    LM.11.S.2      LM.3.HP      LM.3.LP    LM.3.NE.1    LM.3.NE.2    LM.3.NE.3 
+  23.5107901   37.6208221   36.9515349   11.4943541   12.7174250   16.2964200   13.4654572 
+   LM.3.NW.1     LM.3.S.1     LM.3.S.2     LM.3.S.3      LM.6.HP      LM.6.LP    LM.6.NE.1 
+  14.9926796   33.6632455   21.4984541   40.6804171   41.0251904   16.2964200   20.6515878 
+   LM.6.NE.2    LM.6.NW.2     LM.6.S.1     LM.6.S.2     LM.6.S.3    LM.9.NW.1    LM.Pre.HP 
+  23.5107901   46.3120542    9.3699409   10.5376875    8.9118187   15.2511921   35.6245848 
+   LM.Pre.LP  LM.Pre.NE.1  LM.Pre.NE.2  LM.Pre.NE.3  LM.Pre.NW.1  LM.Pre.NW.2  LM.Pre.NW.3 
+  13.9699530    1.2212217   11.7365719    3.2920017    0.4819573    7.1328465    3.6675178 
+  Pre-HP-JGI   Pre-LP-JGI Pre-NE-1-JGI Pre-NE-2-JGI Pre-NE-3-JGI Pre-NW-1-JGI Pre-NW-2-JGI 
+ 204.9795589  274.7169810   48.1222841  230.8202392  335.6733651  126.9442243  186.7364424 
+Pre-NW-3-JGI 
+ 221.2830860
+ 
+ Shannon Values:
+ 
+   11-HP-JGI    11-LP-JGI  11-NE-1-JGI  11-NE-2-JGI   11-S-1-JGI   11-S-2-JGI     3-HP-JGI 
+   5.6121934    5.6836860    4.9746011    4.4597519    4.9422190    4.8181185    5.4632863 
+    3-LP-JGI   3-NE-1-JGI   3-NE-2-JGI   3-NE-3-JGI   3-NW-1-JGI    3-S-1-JGI    3-S-2-JGI 
+   5.7750729    4.3869958    5.5929628    5.7617373    4.8734629    4.1688400    5.1297044 
+   3-S-3-JGI     6-HP-JGI     6-LP-JGI   6-NE-1-JGI   6-NE-2-JGI   6-NW-2-JGI    6-S-1-JGI 
+   4.6580627    5.4048064    4.9648497    4.9226711    4.9396948    5.2150012    3.7926188 
+   6-S-2-JGI    6-S-3-JGI   9-NW-1-JGI     LM.11.HP     LM.11.LP   LM.11.NE.1   LM.11.NE.2 
+   4.2583231    4.9983102    5.2720317    3.9060749    2.8384473    1.6191293    2.4041158 
+   LM.11.S.1    LM.11.S.2      LM.3.HP      LM.3.LP    LM.3.NE.1    LM.3.NE.2    LM.3.NE.3 
+   3.1606424    3.5128251    4.0119414    2.4399828    3.1523497    1.7280666    3.1581913 
+   LM.3.NW.1     LM.3.S.1     LM.3.S.2     LM.3.S.3      LM.6.HP      LM.6.LP    LM.6.NE.1 
+   2.1921204    3.2498013    3.3888567    3.9652162    3.1513212    1.3164883    2.2273086 
+   LM.6.NE.2    LM.6.NW.2     LM.6.S.1     LM.6.S.2     LM.6.S.3    LM.9.NW.1    LM.Pre.HP 
+   2.4090373    4.1025089    0.4696876    3.0435903    2.0289153    2.8168315    3.9232559 
+   LM.Pre.LP  LM.Pre.NE.1  LM.Pre.NE.2  LM.Pre.NE.3  LM.Pre.NW.1  LM.Pre.NW.2  LM.Pre.NW.3 
+   2.4925864    1.0070488    2.8903596    2.3967411    0.8129021    2.2733497    2.0580731 
+  Pre-HP-JGI   Pre-LP-JGI Pre-NE-1-JGI Pre-NE-2-JGI Pre-NE-3-JGI Pre-NW-1-JGI Pre-NW-2-JGI 
+   5.1747125    5.7007278    2.3391980    5.4163976    5.6838619    4.4340868    4.5294991 
+Pre-NW-3-JGI 
+   4.8714287 
+
+
+Wilcoxon signed rank test with continuity correction results:
+
+data:  site.richness
+V = 2080, p-value = 3.608e-12
+alternative hypothesis: true location is not equal to 0
+
+
+data:  site.shannon
+V = 2080, p-value = 3.61e-12
+alternative hypothesis: true location is not equal to 0
+
+
+data:  site.fisher
+V = 2080, p-value = 3.608e-12
+alternative hypothesis: true location is not equal to 0
+
+![Rarefaction Curve Results](Figures/CombinedDataFigures/CombinedDataRrarecurve.png)
+
+These results show that in terms of species per sample size, the JGI data overall scales up to a maximum of ~600 species/sample and a miminum of 400 Species/sample after random sampling, with the standard primer samples not reach more than 200. The pre-wetting samples notably scored exceptionally low in species found per sample size from the standard primers; this trend was not observed for the JGI primers.
+
+## Beta Diversity Ordination and PCoA Results
+
+
+![Ordination Plot by Sample Source](Figures/CombinedDataFigures/CombinedPCoAOrdSource.png)
+
+This ordination plot compares the similarities of OTUs between the JGI and Standard (Uren) primer datasets. Overall, both sample sets show a similar trend in OTU clustering, with the OTUs of several sites clustering together in one side of ordination space, with the rest spread out throughout the space. Although both datasets show similar clustering trends, the JGI set features more sites' OTUs clustering together, with 9 outlier sites vs. 23 outliers for the standard primer set.
+
+![Ordination Plot by Sample Site](Figures/CombinedDataFigures/CombinedOrdinationBySite.png)
+
+The same sample data ordination as before, but this time colored by sample site. There are no visually standout trends as to which sample sites are more likely to produce outliers from the cluster than other. The only sample site to not produce any outliers was the S-JGI sample site.
+
+
+## VEGAN Beta Diversity
+
+
+Homogeneity of multivariate dispersions for beta diversity of combined data by sample source:
+
+Average distance to median:
+   JGI   Uren 
+0.6117 0.6044 
+
+![Beta Diversity by Sample Source](Figures/CombinedDataFigures/CombinedBetaDiversityPCoA.png)
+![Beta Diversity by Source Boxplot](Figures/CombinedDataFigures/CombinedBetaDiversityBoxplot.png) 
+
+Overall, the Uren dataset showed a higher degree of variability in distance to the centroid than the JGI dataset; however, both feature medians that are relatively close to one another at roughly 0.6 units of distance from the centroid.
+
+Homogeneity of multivariate dispersions for beta diversity of combined data by sample site:
+
+Average distance to median:
+ HP-JGI HP-Uren  LP-JGI LP-Uren  NE-JGI NE-Uren  NW-JGI NW-Uren   S-JGI  S-Uren 
+ 0.5309  0.5525  0.5309  0.4932  0.6019  0.5958  0.5866  0.4932  0.4992  0.6343
+ 
+![Beta Diversity by Sample Site](Figures/CombinedDataFigures/CombinedPCoABetaDiversitybysite.png)
+
+![Beta Diversity by Sample Site Boxplot](Figures/CombinedDataFigures/CombinedDatabysiteBoxplot.png)
+
+A graphical illustration of the results of the beta diversity PCoA, but this time displayed by sample site. Overall, much of the variability in the Uren data is being driven by the LP and NW sites, which feature large outliers and large gaps between their mamima and minima. the gaps in centroid distance between the S-JGI and S-Uren data are notable, as are the distance gaps between NW-JGI and NW-Uren
+
+Permutation test for homogeneity of multivariate dispersions of combined data:
+
+Permutation: free
+Number of permutations: 999
+
+Response: Distances
+          Df  Sum Sq   Mean Sq     F N.Perm Pr(>F)
+Groups     1 0.00085 0.0008471 0.077    999  0.797
+Residuals 62 0.68182 0.0109971   
+
+
+## FUNGuild Functional Guild Assignment
+Overall, there were 8613 successful assignments out of a total of 37,751 attempted assignments, for a 22.8% assignment rate. 498 of the sequences wew matched from the Standard primer set, and 8115 of them were matched from the JGI primer set.
+
+In terms of Funtional guild, the majority of the the fungal species present in the Biosphere 2 forest are generalist saprobes, representing 61% of the functional guilds. specialized wood saprobes were 12.3% of OTUs, and soil saprobes were 7.5% of OTUs.  pathogens of plants, with them representing 20% of OTUs. Endophytic species were present in 12.5% of OTUs. specialized animal pathogens represented 1.76% of OTUs. ECM fungi represented 1.44% of OTUs. There was some overlap between functional groups, particularly with wood saprobes and plant pathogens, as many tree pathogens continue to decay wood after the death of the tree.
+
+In terms of taxonomy, the two most abundant were the Ascomycota, with 6572 species, and Basidiomycota, with 1126 species. Together, these phyla accounted for 89% of the fungi successfully assigned functional groups.
+
+At 3504 hits, the Sordariomycetes compose the largest class of Ascomycete identified. 1721 belong to the order Hypocreales; this group features many fungi that live as endophytes within plants, as well as species that live parasitic lifestyles on plants, animals, and macrofungi. Notable genera include *Fusarium* and *Acremonium*; the matches for these genera came from species which live as endophytes, wood saprobes, or weak pathogens, and are the most common results from the Hypocreales. *Balansia* is a Class 1 endophyte genera of grasses. Another notable genus is *Metacordyceps*, which parasitise insects. 
+The next most common OTUs in Sordariomycetes come from the Sordariales, with 661 assigned OTUs; most of this family is composed of plant and dung decomposers, and indeed, all of the IDed OTUs from the Sordariales could be assigned to one of those two functional groups. 
+338 OTUs were assigned to the Microascales, a diverse group of plant saprobes. Members of the family Halosphaeriaceae deacy wood in intertidal zones, those in Microascaceae are associated with decaying vegetation, dung, and compost.
+304 OTUs came from the Glomerellales, with all OTUs belonging to white rot-causing tree pathogens.  
+The order Xylariales saw 178 OTUs assigned; most of this order are wood decomposers and many are also plant pathogens. Most of the OTUs IDed were pathogens; one notable ID was for *Zygosporium sp.*, which are pathogens of plants in the neotropical tree family Sapotaceae. 83 OTUs came from Pleurotheciales, from two soft-rotting genera: *Pleurotheciella* and *Phaeoisaria*. 
+49 OTUs were from Chaetosphaeriales, with all coming from cellulose-decomposing genera.  Another minor order was the Savoryellales, the 36 OTUs of which came entirely from aquatic wood decomposers. 
+34 OTUs came from the order Diaporthales, with most coming from plant pathogens in the genus *Diaporthe* and 1 from the plant pathogen genus *Phomopsis*. 
+34 OTUs came from the order Coniochaetales, which decay cellulose and dung. 
+27 hits were from Magnaporthales, with a notable species being *Falciphora oryzae*, a pathogen of rice roots. 16 hits were for the order Trichosphaeriales, which were all undefined saprobes. 
+15 OTUs came from the order Lulworthiales, all all originating with members of the marine wood-decomposer genera *Moleospora*. 
+10 OTUs from 2 species came from the Ophiosomatles: *Hawksworthiomyces hibbettii*, a tree pathogen associated with bark-boring beetles, and *Sporothrix bragantia*, which causes skin diseases in humans and other mammals. 
+10 hits came from the order Melanosporales, from the dung-associated species *Melanospora verrucispora*.
+The order Phomatosporales had 6 OTUs, which all came from the dung-decomposing *Phomatospora*.
+4 OTUs came from Pisorisporiales, with all belonging to the aquatic wood-decomposer *Achroceratosphaeria potamia*
+
+Of the Ascomycetes, the Dothideomycetes class can claim 1194 assigned OTUs. The majority live as molds or endophytes, with some groups acting as pathogens. 794 of the OTUs were assigned to the order Pleosporales, representing the majority of the Dothideomycetes present. This order is mostly soft rot wood decomposers, with some pathogen species, such as *Allophoma minor*, *Ulocladium chartarum* *Massarina sp.*, *Stagonospora sp.*, and *Curvularia sp.*. The genus *Biatriospora* is notable for being marine-identified wood decomposers. the species *Pyrenochaetopsis leptospora* is a generalist endophyte; *Periconia sp.* are dark septate endophytes that have identified colonizing the roots of plants in the families Asteraceae and Musaceae. *Torula hollandica* is an endophytic species found colonizing plants in the family Caryophyllaceae.
+There were 128 hits for the order Capnodiales, most of which came from the diverse, primarily saprobic genus *Cladosporium*. Another notable hit was for the soil saprobe genus *Acidella*, which specialize in highly acidic soils. The other hits were for species which were generalist cellulotyic plant-decaying species.
+113 hits were from the order Venturiales, and featured 2 families: Venturiaceae, which consists of endophytes of aerial plant tissue, and Sympoventuriaceae, which are generalist soil saprobes. 
+The Acrospermales order got 53 hits, all of which were for undefinied saprobes, except for *Lichenoconium erodens*, which is a lichenous fungi.
+The Order Tubeufiales, with 43 hits, claims some of the more unique Dothideomycetes, featuring a Symbiotrophic endophyte of palms, *Wiesneriomyces laurinus*, as well as *Chlamydotubeufia khunkornensis*, which is parasitic on insects and fungi.
+The Jahunales featured 17 hits, which came from species saprobic on wood in aquatic habitats.
+Botryosphaeriales featured 15 hits, all of which came from plant pathogens.
+the Minutisphaerales got 6 hits from undefined saprobes.
+The Myriangiales featured 2 hits from leaf-spot forming plant pathogens.
+
+The Eurotiomycetes was the next most abundant class of Ascomycota, featuring 1135 assigned OTUs. 467 OTUs were from the order Chaetothyriales, which is a group that comprises opportunistically pathogenic, yeast-living fungi that cause leaf spots and tumors in plants, as well as internal mycoses immunocompromised humans. 
+461 OTUs belonged to members of the Eurotiales, which includes common indoor mold speces such as *Aspergillus* and *Penicillum*; all OTUs came from generalist saprobe species. 
+203 belonged to the order Onygenales, which included genera of the Ajellomycetaceae family, a group of animal pathogens that cause skin mycoses in humans in the neotropics. 
+The rest were from the family Onygenales, which feature soft rot, dung, and keratin saprotrophs. 
+3 hits were from *Phaeomoniella sp.* from the Phaeomoniellaceae, which are pathogens of *Prunus sp.* trees. The genus *Dactylospora* from the Dactylosporaceae got 1 hit, which are lichenous fungi.
+The Leotiomycetes was the next most abundant class, with 236 OTUs IDed. It features species that can live as either soft rot wood decomposers or dark septate endophytes.
+The class Pezizomycetes featured 148 OTUs, all of which were from general saprobes of dung and soil.
+
+Of the Basidiomycota, 907 of the species were from the class Agaricomycetes, which contains typical mushroom-forming species associated with forest biomes. 629 belonged to members of the order Agaricales, all of which came from genera which are generalist decayers of dung and plant matter in forests and grasslands.
+80 OTUs came from the Trechisporales, with 2 families represented. 79 of the OTUs came from genera that cause white rot of living trees, with the exception of one hit for *Tomentella ellisii*, which is an ectomycorrhizal species. 
+54 OTUs came from members of the order Polyporales, all of which came from parasitic genera that attack the roots of trees, causing white and brown rots.
+47 OTUs came from Cantharellales, with 46 belonging to Cantharellales. They are typically root parasites, but can form ectomycorrhizae with Orchidaceae. 1 OTU belonged to *Hydnum sp.*, which are ectomycorrhizal.
+27 OTUs came from the order Sebacinales, with 25 coming from the family Sebacinaceae, which are ectomycorrhizal symbionts with a wide variety of plant species. The remaining 2 OTUs are from *Serendipita indica*, a root endophyte.
+26 OTUs belonged to the Hymenochaetales, will all coming from genera that cause white rot in dead wood. 
+24 OTUs came from the Russulales, which are primarily ectomychorrizal symbionts of trees. There were 8 hits for 2 ectomycorrizhal species : 6 for *Russula acrifolia* and 2 for *Lactarius trivialis*. The other 16 hits were for members of the Lachnocladiaceae, which cause white rot in dead trees.
+17 OTUs came from Boletales, who from ectomycorrhizae with trees. 
+3 OTUs came from Geastrales; 2 for the dung/soil saprobes *Geastrum sp.* and 1 for the ectomycorrhizal genus *Sclerogaster*
+There were 123 members of the class Tremellomycetes. All identified speces are yeast-forming, featuring soil saprobe genera, as well as vertebrate skin specialists. 3 genera IDed live on human skin, and cause dandruff. There were 22 members of the Exobasidiomycetes, all of which were members of plant pathogen genera that infest monocots. there were 19 members of Microbotryomycetes, with 2 main groups: free-living soil saprobes and yeasts associated with human skin. and There are 7 members of the class Dacrymycetes, all of which a wood saprobes which cause brown rot. 7 members of the class Malasseziomycetes were found, all of which are *Malassezia sp.* and grow as yeasts on human skin. There are 17 IDs from the Cystobasidiomycetes, from 2 genera, both of which grow as yeasts. The first are from the genus *Cystobasidium sp.*, and are mycoparasites; the second genus is *Sakaguchia sp.*, which are free-living yeasts found in marine environments. there was also a single member of Ustilaginomycetes present, *Pseudomyza hubeiensis*, which causes smut in plants in the Order Poales. There is one member of Pucciniomycetes present, which is a plant pathogen.
+
+Of the remaining 11% of less abundant phyla, 213 were from Mortierellomycota, with all being members of the *Mortierella sp.* genus, which primarily grow as saprobes, but can also be found growing as endophytes. 64 were from Chytridiomycota, with all species being either confirmed or probable plant pathogens. 62 from Mucormycota; most were from generalist saprotroph lineages, with one notable exception: There were several hits for *Endogone sp.*, a genus of ectomycorrhizal fungi associated with poor soils that is mostly saprotrophic, but can also form ectomycorrhial associations. There were 35 from Kickxellomycota, all of which were undefined saprotrophs. 18 were from Calcarisporiellomycota, with all being undefined saprotrophs. 16 were from Blastocladiomycota, with all species also being undefined saprotrophs. Finally, 13 were from Zoopagomycota, all of which were *Syncephalis sp.*, a genus consisting of fungal parasites of vertebrates that infest nails and claws. 
+
+# Discussion
+
+## Implications of Revealed Diversity
+
+In terms of FUNGuild functional guild diversity, the results for saprobes are largely consistent with other findings for soil samples in similar ecosystems; the majority of fungal species present in forest soil tend to be saprobes [@lanforest, @schappe2020co]. However, there are two notable differences between this study and others. First, compared to other studies, the levels of plant pathogens in the soil are elevated. Plant pathogens tend to not be abundant in soil in tropical forests, and are instead most abundant in the higher levels of the canopy [@gora2019microbial]. Even in the soil, average pathogen abundance in OTUs across ecosystems is roughly 4% [@makiola2019land]. The high abundance of pathogens could be due to several reasons. First, it is possible that the long period of neglect of Biosphere 2 during the 2000s lead to higher stress situations for the plants, making them more susceptible to infection by pathogens. Another factor could be that Bioshpere 2 is a fully enclosed ecosystem, making the transfer of pathogen spores from host to host relatively easy. Another factor might be related to the high density of a relatively small number of species, which contributes to higher pathogen load. As the density of many adult trees of the same species increases, the relative abundance of their associated pathogens increases [@liang2016adult]. Finally, luck of the draw could also be a factor, since the fungal biota of the Biosphere 2 was not deliberately engineered, and drew from whatever was included with the animals, plants, and soil brought in during construction. One possible variable influencing the levels of pathogens present could be that these samples were taken during the simulated dry season; levels of pathogens in rainforests tend to increase during the dry season due to higher metabolic activity of the soil vs. lower metabolic activity of host plants [@looby2018shifts]. 
+
+A second result is that the levels of ECM fungi tend to be low. 1% of OTUs fit into the ECM category; other forest ecosystems tend to feature at least 10% of OTUs being ECM, even in degraded habitats [@wilhelm2017biogeography, @lanforest, @song2019tropical, @schroeder2019host]. At least one of the contributing factors is likely similar to studies on degraded tropical forest vs. intact forest, namely, degraded forest tends to feature less overall tree diversity and more soil disturbance, leading to fewer hosts and more damage to soil ecosystems [@lanforest, @song2019tropical]. However, as mentioned earlier, even degraded ecosystems tend to feature higher ECM diversity than Biosphere 2. This could be explained by soil composition. Namely, the soil of Biosphere 2 is a mixture of artificially added soil, and natural soil present at the site. Southern Arizona is many hundreds of miles away from the Neotropical rainforest habitat most of the plants added to Biosphere 2 originate from, and the original vegetative landscape surrounding Biosphere 2 is Sonoran desert. Thus, it is unlikely that many species of compatible ECM were available to colonize the roots of the trees after planting[@schroeder2019host].
+
+Another interesting result of the FUNGuild assignment is that there were hits for several marine and aquatic lineages of Ascomycete wood decomposers. A possible explanation for this could be the result of the proximity of the rainforest to the mangrove swamp zone of Biosphere 2. Although protected directly from salt spray from that ecosystem, it is possible that spores from marine molds could be drawn up into the air circulation systems and find their way into the rainforest ecosystem. It's also possible that at least some of the molds present in aquatic ecosystems could be present in terrestrial ones as well, particularly ones with high overall levels of moisture such as a rainforest.
+
+## Implications of Primer Differences
+
+As mentioned earlier, 498 of the sequences were found with the standard primers, and 8115 were found with the JGI primers. While this difference is large, it is also notable that there is also minimal overlap in amplified sequences between the two datasets. If the number discrepancy were due to more sensitivty from the JGI primers, it would stand to reason that the majority of the sequences amplified by the standard set would overlap with the JGI set, but not vice-versa. However, since there is no overlap, it implies that either the sensitivies of the two primer sets are different enough to be incomparable, or that the sequences amplified by both sets were sufficiently random to generate two non-overlapping datasets. 
+
+## Implications for Biosphere 2 ecology
+
+For the FUNGuild results, the implications of the elevated levels of pathogens and relative lack of ECM fungi implies that the soil ecosystem of Biosphere 2 is highly degraded, and likely does not function in a similar way to a natural soil ecosystem. These results are consistent with other studies on plants and insects in the rainforest that showed that most species come from a small number of abundant species [@wetterer1999ecological, @leigh1999tropical]. Two efforts that could be undertaken in order to balance the soil ecology of the Biosphere 2 rainforest would be introducing more ECM fungi relevant to a neotropical ecosystem, and increasing the diversity of trees present in the ecosystem. Increasing ECM fungi would increase overall tree heath, reducing their suscebtibility to pathogens. Most of the pathogens in the FUNGuild results are described as opportunistic and generalistic, meaning that it is likely that a reduction in stress conditions could dramatically decrease their prevalence. Also, weeding out overabundant species and seeding in more diverse, ecosystem-appropriate species will make it harder for pathogens to spread from host-to-host. However, the enclosed, cramped nature of the Biosphere 2 rainforest will still favor easy transmission of plant pathogens relative to natural ecosystems, and will need to be factored into future forest management.
+
+## Future Directions
+
+In terms of the FUNGuild results, a future direction could be taken in studying more in-depth the extent and prescence of the pathogens in the plants of the Biosphere 2 rainforest. Of particular interest would be sampling higher up in the understory and canopy, to see how the prevalence of foliar pathogens correlates with other studies of foliar canopy pathogens, as well as determine the diversity of pathogens to understand host specificity. Other studies could be done on which ECM and tree species would be best to introduce from neotropical lowland ecosystems in order to better diversity and strengthen the soil, fungal and plant communites of the rainforest and make them both more resiliment and a better facsimilie of a natural ecosystem.
+
+# Sources
+
