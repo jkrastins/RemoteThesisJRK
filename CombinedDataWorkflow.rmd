@@ -1,0 +1,296 @@
+---
+title: "Combined Workflow"
+author: "Jason Krastins"
+date: "8/24/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r library}
+# load packages as needed
+library("dplyr")
+library("fs")
+library("dada2")
+packageVersion("dada2")
+library(ShortRead)
+packageVersion("ShortRead")
+library(Biostrings)
+packageVersion("Biostrings")
+library("tidyr")
+library("knitr")
+library("ggplot2")
+library("phyloseq")
+library("citr")
+library("seqinr")
+library("broom")
+library("vegan")
+library("reticulate")
+library("boot")
+
+```
+
+
+```{r load-packages-and-data}
+# load packages as needed
+library("dplyr")
+library("fs")
+library("dada2")
+packageVersion("dada2")
+library(ShortRead)
+packageVersion("ShortRead")
+library(Biostrings)
+packageVersion("Biostrings")
+library("tidyr")
+library("knitr")
+library("ggplot2")
+library("phyloseq")
+library("citr")
+library("seqinr")
+
+
+```
+
+```{r extract-sample-and-file-name, include = FALSE}
+# NOTE: Much of the following follows the DADA2 tutorials available here:
+# https://benjjneb.github.io/dada2/tutorial.html
+# Accessed November 26, 2018
+
+# set the base path for our input data files
+path <- "/data/RemoteThesis/combined_thesis_data"
+
+# Extract sample names, assuming filenames have format: SAMPLENAME.fastq
+
+filenames_reverse_JGI_reads <- sort(list.files(path))
+
+sample_names <- sapply(strsplit(filenames_reverse_JGI_reads, "_IBESTGRC_JU_988_R2_ITS-hdr.fastq"), `[`, 1)
+
+# Specify the full path to each of the filenames_reverse_JGI_reads
+filenames_reverse_JGI_reads <- file.path(path, filenames_reverse_JGI_reads)
+```
+
+```{r filter-reads}
+# Place filtered files in filtered/ subdirectory
+# note this will fail if the directory doesn't exist
+filter_path <- file.path("output", "filtered")
+filtered_reads_path <- file.path(filter_path,
+                                 paste0(sample_names,
+                                        "_filt.fastq.gz"))
+
+# See ?filterAndTrim for details on the parameters
+# See here for adjustments for ITS data:
+# https://benjjneb.github.io/dada2/ITS_workflow.html
+filtered_output_JGI_reads <- filterAndTrim(fwd = filenames_reverse_JGI_reads,
+                                 filt = filtered_reads_path,           
+                                 trimLeft = 20,
+                                 maxN = 0, # discard any seqs with Ns
+                                 maxEE = 4, # allow w/ up to 4 errors
+                                 truncLen = (240),
+                                 truncQ = 2, # cut off if quality drops here
+                                 rm.phix = TRUE,
+                                 compress = TRUE,
+                                 multithread = TRUE)
+```
+
+
+```{r learn-errors}
+# this build error models from each of the samples
+errors_reverse_JGI_reads <- learnErrors(filtered_reads_path,
+                                    multithread = TRUE)
+```
+
+
+```{r dereplicate-sequences, include = FALSE}
+# get rid of any duplicated sequences
+dereplicated_reverse_JGI_reads <- derepFastq(filtered_reads_path,
+                                         verbose = TRUE)
+
+# Name the derep-class objects by the sample names
+names(dereplicated_reverse_JGI_reads) <- sample_names
+```
+
+```{r infer-samples}
+dadaFs <- dada(dereplicated_reverse_JGI_reads, err=errors_reverse_JGI_reads, multithread=TRUE)
+```
+
+```{r make-sequence-table, include = FALSE}
+# produce the 'site by species matrix'
+sequence_table <- makeSequenceTable(dadaFs)
+```
+
+
+```{r remove-chimeras}
+# Check for and remove chimeras
+sequence_table_nochim <- removeBimeraDenovo(sequence_table,
+                                            method = "consensus",
+                                            multithread = TRUE,
+                                            verbose = TRUE)
+
+# What percent of our reads are non-chimeric?
+non_chimeric_reads <- round(sum(sequence_table_nochim) / sum(sequence_table),
+                            digits = 4) * 100
+```
+
+After removing chimeras, there were `r non_chimeric_reads`% of the cleaned reads left.
+
+```{r assign-taxonomy}
+# assigns taxonomy to each sequence variant based on the UNITE fungal database
+# made up of known sequences
+unite_ref <- "input/sh_general_release_dynamic_04.02.2020.fasta"
+
+taxa <- assignTaxonomy(sequence_table_nochim,
+                       unite_ref,
+                       multithread = TRUE,
+                       tryRC = TRUE) # also check with seq reverse compliments
+
+# show the results of the taxonomy assignment
+unname(taxa)
+```
+
+
+```{r read-in-metadata-and-create-phyloseq}
+
+# Next we want to read in the metadata file so we can add that in too
+# This is not a csv file, so we have to use a slightly different syntax
+# here the `sep = "\t"` tells the function that the data are tab-delimited
+# and the `stringsAsFactors = FALSE` tells it not to assume that things are
+# categorical variables
+metadata_in <- read.table("data/CombinedMetadata.csv",
+                          sep = ",",
+                          header = TRUE,
+                          stringsAsFactors = FALSE,
+                          row.names = sample_names)
+
+
+phyloseq_obj <- phyloseq(otu_table(sequence_table_nochim,
+                                   taxa_are_rows = FALSE), # sample-spp matrix
+                         sample_data(metadata_in),
+                         tax_table(taxa)) # taxonomy for each sequence variant
+
+save(phyloseq_obj, file = "output/phyloseq_obj.Rdata")
+
+
+```
+
+```{r}
+GP.ord <- ordinate(phyloseq_obj, "PCoA", "bray")
+p1 = plot_ordination(phyloseq_obj, GP.ord, type="SampleSource", color="SampleSite", title="Sample Site")
+print(p1)
+
+
+
+plot
+
+```{r}
+JGI.otus <-otu_table(phyloseq_obj)
+```
+
+```{r}
+JGI.raremax <- min(apply(JGI.otus, 1, sum))
+```
+
+```{r}
+JGI.Srare <- rrarefy(JGI.otus, JGI.raremax)
+```
+
+
+```{r}
+plot_richness(JGI.Srare, "metadata_in$SampleSite",  measures = c("Observed"))
+
+plot_richness(JGI.Srare, "metadata_in$SampleSite",  measures = c("Shannon"))
+
+plot_richness(JGI.Srare, "metadata_in$SampleSite",  measures = c("InvSimpson"))
+
+plot_richness(JGI.Srare, measures = c("InvSimpson"))
+```
+
+
+```{r}
+JGI.otus <-otu_table(phyloseq_obj)
+```
+
+
+```{r}
+site.richness <- apply(JGI.Srare > 0, 1, sum)
+
+print(site.richness)
+```
+
+```{r}
+site.fisher <- fisher.alpha(JGI.Srare)
+site.fisher[1:64]
+
+```
+
+```{r}
+site.shannon <- diversity(JGI.Srare, index = "shannon", MARGIN = 1)
+site.shannon[1:64]
+
+```
+
+
+```{r}
+wilcox.test(site.richness)
+
+wilcox.test(site.shannon)
+
+wilcox.test(site.fisher)
+```
+
+
+```{r}
+rarecurve(JGI.Srare, step = 20, sample = JGI.raremax, col = "blue", cex = 0.6 )
+
+```
+
+
+
+```{r}
+plot(JGI.S, JGI.Srare, xlab = "Observed No. of Species", ylab = "Rarefied No. of Species")
+abline(0, 1)
+```
+
+```{r}
+JGI.bray <- vegdist(JGI.Srare, method = "bray")
+(JGI.bray.bdisp <- betadisper(JGI.bray, group = as.factor(metadata_in$SampleSource)))
+```
+
+```{r}
+JGI.bray <- vegdist(JGI.Srare, method = "bray")
+(JGI.bray.bdisp <- betadisper(JGI.bray, group = as.factor(metadata_in$SampleSite)))
+```
+
+
+```{r}
+permutest(JGI.bray.bdisp)
+```
+```{r}
+plot(JGI.bray.bdisp)
+
+```
+
+```{r}
+boxplot(JGI.bray.bdisp)
+```
+
+
+```{r}
+JGI.bray <- vegdist(JGI.Srare, method = "bray")
+(JGI.bray.bdispsite <- betadisper(JGI.bray, group = as.factor(metadata_in$SampleSite)))
+```
+
+```{r}
+plot(JGI.bray.bdispsite)
+```
+
+```{r}
+boxplot(JGI.bray.bdispsite)
+```
+
+
+
+```{python}
+python /data/Guilds_v1.1.py -otu /RemoteThesis/output/CombinedPipelineProducts.RData -db fungi -m -u
+
+```
+
